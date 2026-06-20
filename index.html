@@ -477,14 +477,29 @@
   </div>
 
   <div id="ad-container" class="ad-container">
-    Здесь может быть рекламный баннер ВК
+    Рекламный блок VK Mini Apps
   </div>
 
   <script>
-    // Инициализация мини-приложения VK [web:155][web:16]
+    // Инициализация мини-приложения VK [web:155][web:29]
     if (window.vkBridge) {
       vkBridge.send('VKWebAppInit');
     }
+
+    // Показ баннерной рекламы VK [web:158][web:160]
+    async function showBanner() {
+      if (!window.vkBridge) return;
+      try {
+        await vkBridge.send('VKWebAppShowBannerAd', {
+          banner_location: 'bottom'
+        });
+      } catch (e) {
+        // если нет инвентаря или ошибка — просто игнорируем
+      }
+    }
+
+    // Попытка показать баннер при старте приложения
+    showBanner();
 
     const questions = [
       "Как часто в течение дня вы чувствуете сильную усталость или опустошение?",
@@ -801,6 +816,9 @@
         `;
       }
 
+      // Показать баннер в момент выдачи результата (логический "показ рекламы")
+      showBanner();
+
       resultDiv.style.display = "block";
       resultDiv.classList.remove("visible");
       void resultDiv.offsetWidth;
@@ -848,6 +866,7 @@
         <button id="detailsBtn" class="btn-secondary">Подробнее о точках и практике</button>
       `;
 
+      // Через 1 секунду "после рекламы" плавно показываем совет по времени дня
       setTimeout(() => {
         const timeBlock = document.getElementById("time-hint-block");
         if (timeBlock) timeBlock.classList.add("visible");
