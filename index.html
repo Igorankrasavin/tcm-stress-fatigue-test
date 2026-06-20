@@ -207,7 +207,7 @@
       font-size: 14px;
       font-weight: 700;
       cursor: pointer;
-      transition: background 0.18s ease, transform 0.08s ease, box-shadow 0.18s ease;
+      transition: background 0.18s.ease, transform 0.08s ease, box-shadow 0.18s ease;
     }
 
     .btn-primary {
@@ -278,7 +278,17 @@
 
     .level {
       font-weight: 800;
-      margin-bottom: 6px;
+      margin-bottom: 4px;
+    }
+
+    .level-tag {
+      display: inline-block;
+      margin-top: 2px;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: #e9f2ff;
+      color: #2740b8;
     }
 
     .tcm-block {
@@ -370,6 +380,19 @@
       font-size: 13px;
       color: #555;
     }
+
+    .stats-block {
+      margin-top: 8px;
+      padding: 6px 8px;
+      border-radius: 10px;
+      background: #eaf3ff;
+      font-size: 12px;
+      color: #3c4d7a;
+    }
+
+    .stats-line {
+      margin-top: 2px;
+    }
   </style>
 </head>
 <body>
@@ -381,12 +404,12 @@
     </div>
     <h1>Тест стресса и усталости</h1>
     <div class="subtitle">
-      Ответьте на вопросы за 2–3 минуты. В конце получите уровень нагрузки и рекомендации по ТКМ / Су‑Джок.
+      Ответьте на вопросы за 3–4 минуты. В конце получите уровень нагрузки, профиль по ТКМ и мягкие рекомендации.
     </div>
 
     <div class="progress-wrapper">
       <div class="progress-text">
-        <span id="progress-label">Вопрос 0 из 14</span>
+        <span id="progress-label">Вопрос 0 из 18</span>
         <span id="progress-percent">0%</span>
       </div>
       <div class="progress-bar">
@@ -501,6 +524,7 @@
     // Попытка показать баннер при старте приложения
     showBanner();
 
+    // ВОПРОСЫ (18 штук)
     const questions = [
       "Как часто в течение дня вы чувствуете сильную усталость или опустошение?",
       "Как часто у вас бывают проблемы со сном (трудно заснуть, поверхностный сон, частые пробуждения)?",
@@ -515,7 +539,12 @@
       "Бывает ли у вас ощущение, что даже в выходные не получается полностью восстановиться?",
       "Как часто вы тянетесь к сладкому, кофе или энергетикам, чтобы «дотянуть» день?",
       "Часто ли вы откладываете отдых или паузы, даже когда чувствуете усталость?",
-      "Есть ли у вас ощущение «эмоционального выгорания» — когда хочется всё бросить и ни с кем не общаться?"
+      "Есть ли у вас ощущение «эмоционального выгорания» — когда хочется всё бросить и ни с кем не общаться?",
+      // новые вопросы
+      "Часто ли вам кажется, что вы работаете «на износ» и не успеваете восстановиться между нагрузками?",
+      "Есть ли у вас ощущение, что вы меньше радуетесь тому, что раньше приносило удовольствие?",
+      "Часто ли вы чувствуете, что вам трудно попросить о помощи или делегировать задачи, даже когда вы устали?",
+      "Сколько раз за последнюю неделю вы позволяли себе полноценный отдых хотя бы 30 минут без телефона и дел?"
     ];
 
     const options = [
@@ -549,6 +578,8 @@
 
     const clickSound = new Audio("https://www.fesliyanstudios.com/play-mp3/387");
     clickSound.volume = 0.2;
+
+    const STORAGE_KEY = "stress_test_stats_v1";
 
     function playClick() {
       try {
@@ -585,6 +616,36 @@
         advice: "Сделайте упор на расслабление и улучшение сна, а активные практики перенесите на первую половину следующего дня."
       }
     };
+
+    function loadStats() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY); // [web:183]
+        if (!raw) return null;
+        return JSON.parse(raw);
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function saveStats(currentPercent, currentLevelKey, currentLevelText) {
+      try {
+        const prev = loadStats();
+        const attempts = prev?.attempts ? prev.attempts + 1 : 1;
+
+        const data = {
+          attempts,
+          lastResult: {
+            percent: currentPercent,
+            levelKey: currentLevelKey,
+            levelText: currentLevelText,
+            timestamp: Date.now()
+          },
+          prevResult: prev?.lastResult || null
+        };
+
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); // [web:175][web:183]
+      } catch (e) {}
+    }
 
     function renderQuestions() {
       questionsContainer.innerHTML = "";
@@ -695,6 +756,71 @@
       }
     }
 
+    function getLevelInfo(percent) {
+      // 4 уровня: 0–25, 26–50, 51–75, 76–100 [web:166][web:173]
+      if (percent <= 25) {
+        return {
+          key: "low",
+          title: "Нагрузка в пределах нормы",
+          tag: "Уровень 1 из 4",
+          tcmText: "С позиции ТКМ это похоже на относительно гармоничный баланс Ци. Важно поддерживать то, что уже работает: сон, движение, дыхание.",
+          sujokText: "Су-Джок: периодически массируйте зону большого пальца кисти (голова) и центр ладони мягкими круговыми движениями 1–2 минуты, как лёгкую профилактику.",
+          detailsHtml: `
+            <ul style="margin:8px 0 0 18px;padding:0;font-size:13px;color:#444;">
+              <li>Сохраняйте стабильный режим сна и подъёма.</li>
+              <li>Добавляйте короткие паузы в течение дня (1–2 минуты дыхания животом).</li>
+              <li>Регулярно делайте мягкий массаж кистей и шеи, не доводя себя до сильной усталости.</li>
+            </ul>
+          `
+        };
+      } else if (percent <= 50) {
+        return {
+          key: "elevated",
+          title: "Повышенный уровень нагрузки",
+          tag: "Уровень 2 из 4",
+          tcmText: "В ТКМ это может соответствовать началу застоя Ци печени и лёгкому ослаблению Ци селезёнки: накапливается напряжение, устают мышцы и голова.",
+          sujokText: "Су-Джок: уделяйте внимание зонам шеи и плеч на кисти (основание большого и указательного пальца), прокатывайте кисть и пальцы мячиком 3–5 минут.",
+          detailsHtml: `
+            <ul style="margin:8px 0 0 18px;padding:0;font-size:13px;color:#444;">
+              <li>Обратите внимание на вечерние привычки (гаджеты, тяжёлая еда, поздняя работа).</li>
+              <li>Старайтесь делать небольшие паузы каждые 1–2 часа нагрузки.</li>
+              <li>Добавьте 1–2 короткие практики в день: дыхание, Су‑Джок, короткую прогулку.</li>
+            </ul>
+          `
+        };
+      } else if (percent <= 75) {
+        return {
+          key: "high",
+          title: "Высокий уровень усталости",
+          tag: "Уровень 3 из 4",
+          tcmText: "В ТКМ это похоже на выраженный застой Ци и постепенное истощение ресурса (почки/сердце). Телу уже сложно компенсировать нагрузку.",
+          sujokText: "Су-Джок: ежедневно работайте с центром ладони и зонами по краю большого пальца (голова/шея), добавьте мягкое надавливание в зоне солнечного сплетения на кисти.",
+          detailsHtml: `
+            <ul style="margin:8px 0 0 18px;padding:0;font-size:13px;color:#444;">
+              <li>По возможности пересмотрите нагрузку и добавьте время на восстановление.</li>
+              <li>Слушайте сигналы тела: головные боли, тяжесть в груди, сбой сна — повод притормозить.</li>
+              <li>Продумайте ежедневный ритуал восстановления (хотя бы 10–15 минут) и придерживайтесь его.</li>
+            </ul>
+          `
+        };
+      } else {
+        return {
+          key: "very_high",
+          title: "Очень высокий уровень нагрузки",
+          tag: "Уровень 4 из 4",
+          tcmText: "С точки зрения ТКМ это может говорить о выраженном застое и явном истощении ресурса. Важно не игнорировать состояние и бережно снижать нагрузку.",
+          sujokText: "Су-Джок: мягко, но регулярно работайте с центром ладони, большим пальцем (голова) и зонами шеи/плеч на кисти, добавьте практики на успокоение дыхания.",
+          detailsHtml: `
+            <ul style="margin:8px 0 0 18px;padding:0;font-size:13px;color:#444;">
+              <li>Серьёзно подумайте о снижении нагрузки и поддержке (специалист, надёжные люди рядом).</li>
+              <li>Не игнорируйте устойчивые симптомы (боль в груди, сильная одышка, постоянная бессонница) — это повод обратиться к врачу.</li>
+              <li>Разделите восстановление на маленькие шаги: несколько коротких практик в течение дня лучше, чем редкие «рывки».</li>
+            </ul>
+          `
+        };
+      }
+    }
+
     function calcResult() {
       playClick();
 
@@ -702,14 +828,21 @@
       const max = questions.length * 4;
       const percent = Math.round(total / max * 100);
 
-      let levelText = "";
-      let tcmText = "";
-      let sujokText = "";
-      let detailsHtml = "";
+      // Новый расчёт уровней
+      const levelInfo = getLevelInfo(percent);
+      const levelTitle = levelInfo.title;
+      const levelTag = levelInfo.tag;
+      const tcmText = levelInfo.tcmText;
+      const sujokText = levelInfo.sujokText;
+      const detailsHtml = levelInfo.detailsHtml;
 
-      const liverIndexes = [2, 3, 4, 9];
-      const kidneyIndexes = [0, 8, 10, 13];
-      const heartIndexes = [1, 5, 6, 7];
+      // Профили по ТКМ — обновляем индексы с учётом новых вопросов
+      // liver: эмоции, раздражительность, зажимы, тяжесть в груди/голове, «на износ», трудность делегировать
+      const liverIndexes = [2, 3, 4, 9, 14, 16];
+      // kidney: усталость, сон, «нет ресурса», восстановление, отдых
+      const kidneyIndexes = [0, 1, 8, 10, 13, 17];
+      // heart: сон, мысли, тревога, концентрация, радость
+      const heartIndexes = [1, 5, 6, 7, 15];
 
       const maxLiver = liverIndexes.length * 4;
       const maxKidney = kidneyIndexes.length * 4;
@@ -768,41 +901,6 @@
         `;
       }
 
-      if (percent <= 30) {
-        levelText = "Уровень стресса и усталости: низкий.";
-        tcmText = "С позиции ТКМ это похоже на относительно гармоничный баланс Ци. Поддерживайте режим сна, лёгкую физическую активность и мягкое дыхание животом.";
-        sujokText = "Су-Джок: периодически массируйте зону большого пальца кисти (голова) и центр ладони (сердце/перикард) мягкими круговыми движениями 1–2 минуты.";
-        detailsHtml = `
-          <ul style="margin:8px 0 0 18px;padding:0;font-size:13px;color:#444;">
-            <li>Сохраняйте стабильный режим сна и подъёма.</li>
-            <li>Добавляйте короткие паузы в течение дня (1–2 минуты дыхания животом).</li>
-            <li>Регулярно делайте мягкий массаж кистей и шеи, не доводя себя до сильной усталости.</li>
-          </ul>
-        `;
-      } else if (percent <= 60) {
-        levelText = "Уровень стресса и усталости: умеренный.";
-        tcmText = "В ТКМ это может соответствовать началу застоя Ци печени и ослаблению Ци селезёнки: накапливается напряжение, устают мышцы и голова.";
-        sujokText = "Су-Джок: уделяйте внимание массажу зон шеи/плеч на кисти (основание большого и указательного пальца), прокатывайте кисть и пальцы массажным мячиком 3–5 минут.";
-        detailsHtml = `
-          <ul style="margin:8px 0 0 18px;padding:0;font-size:13px;color:#444;">
-            <li>Обратите внимание на качество сна и вечерние привычки (гаджеты, тяжёлая еда).</li>
-            <li>Старайтесь делать небольшие паузы каждые 1–2 часа работы.</li>
-            <li>Включайте в день несколько «якорей спокойствия»: дыхание, Су‑Джок, прогулку.</li>
-          </ul>
-        `;
-      } else {
-        levelText = "Уровень стресса и усталости: выраженный.";
-        tcmText = "В ТКМ это может говорить о выраженном застое Ци и возможном истощении Ци почек/сердца. Важно постепенно снижать нагрузку и восстанавливать ресурс.";
-        sujokText = "Су-Джок: ежедневно работайте с центром ладони и зонами по краю большого пальца (голова/шея), добавьте мягкое надавливание в зоне солнечного сплетения на кисти, дышите медленно и глубоко.";
-        detailsHtml = `
-          <ul style="margin:8px 0 0 18px;padding:0;font-size:13px;color:#444;">
-            <li>По возможности снижайте нагрузку и увеличивайте время на восстановление.</li>
-            <li>Слушайте сигналы тела: частые головные боли, тяжесть в груди, сбой сна — повод притормозить.</li>
-            <li>Подумайте о поддержке: специалист, надёжный человек, с кем можно обсудить состояние.</li>
-          </ul>
-        `;
-      }
-
       const timeOfDay = getTimeOfDay();
       const timeHint = timeHints[timeOfDay] || null;
 
@@ -816,7 +914,46 @@
         `;
       }
 
-      // Показать баннер в момент выдачи результата (логический "показ рекламы")
+      // Статистика: сохраняем текущий результат, достаём предыдущий
+      saveStats(percent, levelInfo.key, levelTitle);
+      const stats = loadStats();
+
+      let statsHtml = "";
+      if (stats) {
+        const attempts = stats.attempts || 1;
+        const prev = stats.prevResult;
+        let trendText = "";
+
+        if (prev && typeof prev.percent === "number") {
+          const diff = percent - prev.percent;
+          if (Math.abs(diff) < 3) {
+            trendText = "Динамика почти без изменений — важно сохранять выбранный ритм и практики.";
+          } else if (diff < 0) {
+            trendText = "Есть движение в сторону снижения нагрузки — отметьте, что вам в этом помогает.";
+          } else {
+            trendText = "Нагрузка стала выше — попробуйте мягко добавить больше отдыха и поддержки.";
+          }
+
+          statsHtml = `
+            <div class="stats-block">
+              <div class="stats-line"><b>Прохождений теста:</b> ${attempts}</div>
+              <div class="stats-line">Предыдущий результат: ${prev.percent}% (${prev.levelText || "уровень"})</div>
+              <div class="stats-line">Текущий результат: ${percent}% (${levelTitle})</div>
+              <div class="stats-line" style="margin-top:4px;">${trendText}</div>
+            </div>
+          `;
+        } else {
+          statsHtml = `
+            <div class="stats-block">
+              <div class="stats-line"><b>Это ваш первый сохранённый результат.</b></div>
+              <div class="stats-line">Текущий результат: ${percent}% (${levelTitle})</div>
+              <div class="stats-line" style="margin-top:4px;">Вы можете время от времени повторять тест и отслеживать динамику.</div>
+            </div>
+          `;
+        }
+      }
+
+      // Показать баннер в момент выдачи результата
       showBanner();
 
       resultDiv.style.display = "block";
@@ -825,8 +962,10 @@
       resultDiv.classList.add("visible");
 
       resultDiv.innerHTML = `
-        <div class="level">${levelText}</div>
-        <div class="tcm-block">
+        <div class="level">${levelTitle}</div>
+        <div class="level-tag">Итоговый балл: ${percent}% · ${levelTag}</div>
+        ${statsHtml}
+        <div class="tcm-block" style="margin-top:10px;">
           <div class="tcm-title">Взгляд ТКМ:</div>
           <div class="tcm-text">${tcmText}</div>
         </div>
