@@ -4,14 +4,18 @@
   <meta charset="UTF-8">
   <title>Тест уровня стресса и усталости</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- VK Bridge для VK Mini Apps -->
+  <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
+
   <style>
     :root {
       --bg: #eef3ff;
       --card-bg: #ffffff;
-      --accent: #4c6fff;          /* яркий синий */
+      --accent: #4c6fff;
       --accent-soft: #e1e7ff;
       --accent-strong: #2740b8;
-      --accent-contrast: #39c46a; /* лаймово-зелёный */
+      --accent-contrast: #39c46a;
       --text-main: #141824;
       --text-muted: #7a8194;
       --border-soft: #d4ddff;
@@ -88,8 +92,6 @@
       border-radius: 50%;
       background: var(--accent-contrast);
     }
-
-    /* Прогресс-бар */
 
     .progress-wrapper {
       margin-bottom: 14px;
@@ -175,11 +177,7 @@
       padding: 8px 10px;
       border: none;
       cursor: pointer;
-      transition:
-        background 0.15s ease,
-        transform 0.08s ease,
-        box-shadow 0.15s ease,
-        color 0.15s ease;
+      transition: background 0.15s ease, transform 0.08s ease, box-shadow 0.15s ease, color 0.15s ease;
       box-shadow: 0 1px 3px rgba(0,0,0,0.04);
       white-space: nowrap;
     }
@@ -209,10 +207,7 @@
       font-size: 14px;
       font-weight: 700;
       cursor: pointer;
-      transition:
-        background 0.18s ease,
-        transform 0.08s ease,
-        box-shadow 0.18s ease;
+      transition: background 0.18s ease, transform 0.08s ease, box-shadow 0.18s ease;
     }
 
     .btn-primary {
@@ -259,21 +254,10 @@
       box-shadow: 0 3px 10px rgba(68,80,150,0.2);
     }
 
-    /* Анимация появления результата */
-
     @keyframes result-pop {
-      0% {
-        opacity: 0;
-        transform: translateY(10px) scale(0.97);
-      }
-      60% {
-        opacity: 1;
-        transform: translateY(0) scale(1.02);
-      }
-      100% {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-      }
+      0% { opacity: 0; transform: translateY(10px) scale(0.97); }
+      60% { opacity: 1; transform: translateY(0) scale(1.02); }
+      100% { opacity: 1; transform: translateY(0) scale(1); }
     }
 
     .result {
@@ -363,7 +347,6 @@
       margin-left: 4px;
     }
 
-    /* Блок с советами по времени дня (будем показывать с задержкой) */
     .time-hint-block {
       margin-top: 8px;
       padding-top: 6px;
@@ -390,7 +373,7 @@
   </style>
 </head>
 <body>
-  <!-- Экран 1: тест + результат -->
+  <!-- Экран 1 -->
   <div id="main-screen" class="app">
     <div class="pill">
       <div class="pill-dot"></div>
@@ -401,7 +384,6 @@
       Ответьте на вопросы за 2–3 минуты. В конце получите уровень нагрузки и рекомендации по ТКМ / Су‑Джок.
     </div>
 
-    <!-- Прогресс-бар -->
     <div class="progress-wrapper">
       <div class="progress-text">
         <span id="progress-label">Вопрос 0 из 14</span>
@@ -423,7 +405,7 @@
     </div>
   </div>
 
-  <!-- Экран 2: подробные рекомендации по точкам -->
+  <!-- Экран 2 -->
   <div id="details-screen" class="app" style="display:none;">
     <div class="pill">
       <div class="pill-dot"></div>
@@ -433,8 +415,7 @@
     <div id="profile-hint" class="subtitle" style="margin-top:-4px;">
       Ориентируйтесь на свой «профиль нагрузки» в результате теста: печень, почки, сердце/шэнь.
     </div>
-    <div id="time-hint-secondary" class="subtitle" style="margin-top:-8px; font-size:12px; color:#9aa1b8;">
-    </div>
+    <div id="time-hint-secondary" class="subtitle" style="margin-top:-8px; font-size:12px; color:#9aa1b8;"></div>
 
     <div id="block-liver" class="tcm-block">
       <div class="tcm-title">
@@ -495,12 +476,16 @@
     </div>
   </div>
 
-  <!-- Резервное место под рекламный баннер VK -->
   <div id="ad-container" class="ad-container">
     Здесь может быть рекламный баннер ВК
   </div>
 
   <script>
+    // Инициализация мини-приложения VK [web:155][web:16]
+    if (window.vkBridge) {
+      vkBridge.send('VKWebAppInit');
+    }
+
     const questions = [
       "Как часто в течение дня вы чувствуете сильную усталость или опустошение?",
       "Как часто у вас бывают проблемы со сном (трудно заснуть, поверхностный сон, частые пробуждения)?",
@@ -545,10 +530,8 @@
     const progressPercent = document.getElementById("progress-percent");
     const progressFill = document.getElementById("progress-fill");
 
-    // ведущий профиль: 'liver' | 'kidney' | 'heart'
     let dominantProfile = null;
 
-    // звук клика
     const clickSound = new Audio("https://www.fesliyanstudios.com/play-mp3/387");
     clickSound.volume = 0.2;
 
@@ -560,11 +543,9 @@
       } catch (e) {}
     }
 
-    // определяем время суток [web:138][web:141]
     function getTimeOfDay() {
       const now = new Date();
       const hour = now.getHours();
-
       if (hour >= 5 && hour < 12) return "morning";
       if (hour >= 12 && hour < 18) return "day";
       if (hour >= 18 && hour < 23) return "evening";
@@ -655,16 +636,9 @@
       const answeredCount = answers.filter(a => a !== null).length;
       const total = questions.length;
       const percent = Math.round((answeredCount / total) * 100);
-
-      if (progressLabel) {
-        progressLabel.textContent = `Вопрос ${answeredCount} из ${total}`;
-      }
-      if (progressPercent) {
-        progressPercent.textContent = `${percent}%`;
-      }
-      if (progressFill) {
-        progressFill.style.width = `${percent}%`;
-      }
+      if (progressLabel) progressLabel.textContent = `Вопрос ${answeredCount} из ${total}`;
+      if (progressPercent) progressPercent.textContent = `${percent}%`;
+      if (progressFill) progressFill.style.width = `${percent}%`;
     }
 
     function highlightProfileBlock() {
@@ -697,9 +671,7 @@
         targetBlock.style.backgroundColor = "#f3f6ff";
       }
 
-      if (hintText) {
-        profileHint.textContent = hintText;
-      }
+      if (hintText) profileHint.textContent = hintText;
 
       const timeOfDay = getTimeOfDay();
       const timeHint = timeHints[timeOfDay];
@@ -755,19 +727,13 @@
 
       function getProfileText(p) {
         if (p.key === 'liver') {
-          return `
-            <li><b>Система «печень»</b> — возможный застой Ци печени: напряжение, раздражительность, мышечные зажимы, тяжесть в груди или голове.</li>
-          `;
+          return `<li><b>Система «печень»</b> — возможный застой Ци печени: напряжение, раздражительность, мышечные зажимы, тяжесть в груди или голове.</li>`;
         }
         if (p.key === 'kidney') {
-          return `
-            <li><b>Система «почки»</b> — признаки истощения ресурса: хроническая усталость, ощущение «батарейка на нуле», слабое восстановление даже после отдыха.</li>
-          `;
+          return `<li><b>Система «почки»</b> — признаки истощения ресурса: хроническая усталость, ощущение «батарейка на нуле», слабое восстановление даже после отдыха.</li>`;
         }
         if (p.key === 'heart') {
-          return `
-            <li><b>Система «сердце/шэнь»</b> — перегрузка ума и духа: беспокойный сон, чувство, что мысли не останавливаются, тревога, рассеянность.</li>
-          `;
+          return `<li><b>Система «сердце/шэнь»</b> — перегрузка ума и духа: беспокойный сон, чувство, что мысли не останавливаются, тревога, рассеянность.</li>`;
         }
         return "";
       }
@@ -825,7 +791,6 @@
       const timeOfDay = getTimeOfDay();
       const timeHint = timeHints[timeOfDay] || null;
 
-      // HTML для блока с подсказкой по времени дня (по умолчанию скрыт, покажем через 1 секунду)
       let timeHtml = "";
       if (timeHint) {
         timeHtml = `
@@ -883,12 +848,9 @@
         <button id="detailsBtn" class="btn-secondary">Подробнее о точках и практике</button>
       `;
 
-      // Через 1 секунду после показа результата «после рекламной паузы» показываем персональный совет [web:142][web:143][web:144]
       setTimeout(() => {
         const timeBlock = document.getElementById("time-hint-block");
-        if (timeBlock) {
-          timeBlock.classList.add("visible");
-        }
+        if (timeBlock) timeBlock.classList.add("visible");
       }, 1000);
 
       const detailsBtn = document.getElementById("detailsBtn");
