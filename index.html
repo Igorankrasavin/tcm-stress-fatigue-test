@@ -62,7 +62,7 @@
     .subtitle {
       font-size: 13px;
       color: var(--text-muted);
-      margin-bottom: 16px;
+      margin-bottom: 10px;
       position: relative;
       z-index: 1;
     }
@@ -87,6 +87,40 @@
       height: 7px;
       border-radius: 50%;
       background: var(--accent-contrast);
+    }
+
+    /* Прогресс-бар */
+
+    .progress-wrapper {
+      margin-bottom: 14px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .progress-text {
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      border-radius: 999px;
+      background: #dde3ff;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--accent), #7a9bff);
+      box-shadow: 0 3px 8px rgba(76,111,255,0.6);
+      transition: width 0.25s ease-out;
     }
 
     .question {
@@ -225,6 +259,23 @@
       box-shadow: 0 3px 10px rgba(68,80,150,0.2);
     }
 
+    /* Анимация появления результата */
+
+    @keyframes result-pop {
+      0% {
+        opacity: 0;
+        transform: translateY(10px) scale(0.97);
+      }
+      60% {
+        opacity: 1;
+        transform: translateY(0) scale(1.02);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
     .result {
       margin-top: 16px;
       padding: 12px;
@@ -233,6 +284,12 @@
       font-size: 14px;
       border: 1px solid var(--border-soft);
       box-shadow: 0 8px 24px rgba(25,45,120,0.12);
+      opacity: 0;
+      transform: translateY(10px) scale(0.97);
+    }
+
+    .result.visible {
+      animation: result-pop 0.35s ease-out forwards;
     }
 
     .level {
@@ -317,6 +374,17 @@
     <h1>Тест стресса и усталости</h1>
     <div class="subtitle">
       Ответьте на вопросы за 2–3 минуты. В конце получите уровень нагрузки и рекомендации по ТКМ / Су‑Джок.
+    </div>
+
+    <!-- Прогресс-бар -->
+    <div class="progress-wrapper">
+      <div class="progress-text">
+        <span id="progress-label">Вопрос 0 из 14</span>
+        <span id="progress-percent">0%</span>
+      </div>
+      <div class="progress-bar">
+        <div id="progress-fill" class="progress-fill"></div>
+      </div>
     </div>
 
     <div id="questions"></div>
@@ -445,10 +513,14 @@
     const blockKidney = document.getElementById("block-kidney");
     const blockHeart = document.getElementById("block-heart");
 
+    const progressLabel = document.getElementById("progress-label");
+    const progressPercent = document.getElementById("progress-percent");
+    const progressFill = document.getElementById("progress-fill");
+
     // ведущий профиль: 'liver' | 'kidney' | 'heart'
     let dominantProfile = null;
 
-    // звук клика [web:118][web:121]
+    // звук клика
     const clickSound = new Audio("https://www.fesliyanstudios.com/play-mp3/387");
     clickSound.volume = 0.2;
 
@@ -493,6 +565,7 @@
             answers[index] = opt.value;
             updateButtonsState(opts, opt.label);
             updateCalcButtonState();
+            updateProgress();
           };
           opts.appendChild(btn);
         });
@@ -500,6 +573,9 @@
         qEl.appendChild(opts);
         questionsContainer.appendChild(qEl);
       });
+
+      // начальное значение прогресса
+      updateProgress();
     }
 
     function updateButtonsState(container, selectedLabel) {
@@ -516,6 +592,22 @@
     function updateCalcButtonState() {
       const allAnswered = answers.every(a => a !== null);
       calcBtn.disabled = !allAnswered;
+    }
+
+    function updateProgress() {
+      const answeredCount = answers.filter(a => a !== null).length;
+      const total = questions.length;
+      const percent = Math.round((answeredCount / total) * 100);
+
+      if (progressLabel) {
+        progressLabel.textContent = `Вопрос ${answeredCount} из ${total}`;
+      }
+      if (progressPercent) {
+        progressPercent.textContent = `${percent}%`;
+      }
+      if (progressFill) {
+        progressFill.style.width = `${percent}%`;
+      }
     }
 
     function highlightProfileBlock() {
@@ -668,6 +760,11 @@
       }
 
       resultDiv.style.display = "block";
+      resultDiv.classList.remove("visible");
+      // небольшая задержка, чтобы перезапустить анимацию
+      void resultDiv.offsetWidth;
+      resultDiv.classList.add("visible");
+
       resultDiv.innerHTML = `
         <div class="level">${levelText}</div>
         <div class="tcm-block">
