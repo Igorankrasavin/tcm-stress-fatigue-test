@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Тест уровня стресса и усталости</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      margin: 0;
+      padding: 16px;
+      background: #f5f5f5;
+      color: #222;
+    }
+    .app {
+      max-width: 480px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    h1 {
+      font-size: 20px;
+      margin-bottom: 8px;
+    }
+    .subtitle {
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 16px;
+    }
+    .question {
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #eee;
+    }
+    .question-title {
+      font-size: 15px;
+      margin-bottom: 8px;
+    }
+    .options {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .option {
+      flex: 1;
+      min-width: 80px;
+    }
+    button {
+      cursor: pointer;
+      border-radius: 8px;
+      border: none;
+      padding: 10px 14px;
+      font-size: 14px;
+    }
+    .btn-primary {
+      background: #5181b8;
+      color: #fff;
+      width: 100%;
+      margin-top: 8px;
+    }
+    .btn-primary:disabled {
+      background: #9fb7d3;
+      cursor: default;
+    }
+    .result {
+      margin-top: 16px;
+      padding: 12px;
+      border-radius: 8px;
+      background: #f0f5ff;
+      font-size: 14px;
+    }
+    .level {
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .tcm-block {
+      margin-top: 8px;
+    }
+    .tcm-title {
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+    .tcm-text {
+      font-size: 13px;
+      color: #333;
+    }
+    .footer {
+      margin-top: 16px;
+      font-size: 12px;
+      color: #999;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <h1>Тест стресса и усталости</h1>
+    <div class="subtitle">
+      Ответьте на вопросы за 1–2 минуты. В конце получите уровень нагрузки и базовые рекомендации по ТКМ / Су-Джок.
+    </div>
+
+    <div id="questions"></div>
+
+    <button id="calcBtn" class="btn-primary" disabled>Посчитать результат</button>
+
+    <div id="result" class="result" style="display:none;"></div>
+
+    <div class="footer">
+      Тест не заменяет консультацию врача. Используйте рекомендации мягко, как само‑помощь.
+    </div>
+  </div>
+
+  <script>
+    const questions = [
+      "Как часто в течение дня вы чувствуете сильную усталость или опустошение?",
+      "Как часто у вас бывают проблемы со сном (трудно заснуть, поверхностный сон, частые пробуждения)?",
+      "Как часто вы ощущаете нервозность, раздражительность или внутреннее напряжение без явной причины?",
+      "Замечаете ли вы, что мышцы шеи, плеч или спины часто напряжены или «каменеют»?",
+      "Как часто у вас бывают головные боли или ощущение тяжести в голове?",
+      "Есть ли у вас ощущение, что мысли «крутятся» и сложно остановить внутренний диалог?",
+      "Замечаете ли вы, что дыхание становится поверхностным (дышите верхом груди, а не животом)?",
+      "Как часто у вас снижается концентрация внимания, забывчивость, рассеянность?",
+      "Есть ли у вас ощущение, что утром вы просыпаетесь уже уставшим?"
+    ];
+
+    const options = [
+      { label: "Редко", value: 1 },
+      { label: "Иногда", value: 2 },
+      { label: "Часто", value: 3 },
+      { label: "Почти всегда", value: 4 }
+    ];
+
+    const answers = new Array(questions.length).fill(null);
+
+    const questionsContainer = document.getElementById("questions");
+    const calcBtn = document.getElementById("calcBtn");
+    const resultDiv = document.getElementById("result");
+
+    function renderQuestions() {
+      questionsContainer.innerHTML = "";
+      questions.forEach((q, index) => {
+        const qEl = document.createElement("div");
+        qEl.className = "question";
+
+        const title = document.createElement("div");
+        title.className = "question-title";
+        title.textContent = (index + 1) + ". " + q;
+        qEl.appendChild(title);
+
+        const opts = document.createElement("div");
+        opts.className = "options";
+
+        options.forEach(opt => {
+          const btn = document.createElement("button");
+          btn.className = "option";
+          btn.textContent = opt.label;
+          btn.onclick = () => {
+            answers[index] = opt.value;
+            updateButtonsState(opts, opt.label);
+            updateCalcButtonState();
+          };
+          opts.appendChild(btn);
+        });
+
+        qEl.appendChild(opts);
+        questionsContainer.appendChild(qEl);
+      });
+    }
+
+    function updateButtonsState(container, selectedLabel) {
+      const buttons = container.querySelectorAll("button");
+      buttons.forEach(btn => {
+        if (btn.textContent === selectedLabel) {
+          btn.style.background = "#5181b8";
+          btn.style.color = "#fff";
+        } else {
+          btn.style.background = "#e4e9f0";
+          btn.style.color = "#222";
+        }
+      });
+    }
+
+    function updateCalcButtonState() {
+      const allAnswered = answers.every(a => a !== null);
+      calcBtn.disabled = !allAnswered;
+    }
+
+    function calcResult() {
+      const total = answers.reduce((sum, v) => sum + v, 0);
+      const max = questions.length * 4;
+      const percent = Math.round(total / max * 100);
+
+      let levelText = "";
+      let tcmText = "";
+      let sujokText = "";
+
+      if (percent <= 30) {
+        levelText = "Уровень стресса и усталости: низкий.";
+        tcmText = "С позиции ТКМ это похоже на относительно гармоничный баланс Ци. Поддерживайте режим сна, лёгкую физическую активность и мягкое дыхание животом.";
+        sujokText = "Су-Джок: периодически массируйте зону большого пальца кисти (голова) и центр ладони (сердце/перикард) мягкими круговыми движениями 1–2 минуты.";
+      } else if (percent <= 60) {
+        levelText = "Уровень стресса и усталости: умеренный.";
+        tcmText = "В ТКМ это может соответствовать началу застоя Ци печени и ослаблению Ци селезёнки: накапливается напряжение, устают мышцы и голова.";
+        sujokText = "Су-Джок: уделяйте внимание массажу зон шеи/плеч на кисти (основание большого и указательного пальца), прокатывайте кисть и пальцы массажным мячиком 3–5 минут.";
+      } else {
+        levelText = "Уровень стресса и усталости: выраженный.";
+        tcmText = "В ТКМ это может говорить о выраженном застое Ци и возможном истощении Ци почек/сердца. Важно постепенно снижать нагрузку и восстанавливать ресурс.";
+        sujokText = "Су-Джок: ежедневно работайте с центром ладони и зонами по краю большого пальца (голова/шея), добавьте мягкое надавливание в зоне солнечного сплетения на кисти, дышите медленно и глубоко.";
+      }
+
+      resultDiv.style.display = "block";
+      resultDiv.innerHTML = `
+        <div class="level">${levelText}</div>
+        <div class="tcm-block">
+          <div class="tcm-title">Взгляд ТКМ:</div>
+          <div class="tcm-text">${tcmText}</div>
+        </div>
+        <div class="tcm-block">
+          <div class="tcm-title">Практика Су-Джок:</div>
+          <div class="tcm-text">${sujokText}</div>
+        </div>
+        <div class="tcm-block" style="margin-top:8px;font-size:12px;color:#777;">
+          При необходимости обращайтесь к врачу. Точки и массаж используйте как мягкую поддерживающую практику.
+        </div>
+      `;
+    }
+
+    calcBtn.addEventListener("click", calcResult);
+
+    renderQuestions();
+  </script>
+</body>
+</html>
