@@ -64,6 +64,12 @@
       background: #9fb7d3;
       cursor: default;
     }
+    .btn-secondary {
+      background: #e4e9f0;
+      color: #222;
+      width: 100%;
+      margin-top: 8px;
+    }
     .result {
       margin-top: 16px;
       padding: 12px;
@@ -93,7 +99,6 @@
       color: #999;
       text-align: center;
     }
-    /* резерв под постоянный баннер */
     .ad-container {
       margin: 16px auto 0;
       max-width: 480px;
@@ -106,10 +111,24 @@
       font-size: 12px;
       color: #888;
     }
+    .back-link {
+      margin-top: 8px;
+      font-size: 13px;
+      color: #5181b8;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+    .list {
+      margin: 4px 0 0 18px;
+      padding: 0;
+      font-size: 13px;
+      color: #444;
+    }
   </style>
 </head>
 <body>
-  <div class="app">
+  <!-- Экран 1: тест + результат -->
+  <div id="main-screen" class="app">
     <h1>Тест стресса и усталости</h1>
     <div class="subtitle">
       Ответьте на вопросы за 2–3 минуты. В конце получите уровень нагрузки и базовые рекомендации по ТКМ / Су‑Джок.
@@ -126,7 +145,64 @@
     </div>
   </div>
 
-  <!-- Резервное место под постоянный рекламный баннер VK (в VK-версии сюда «сядет» реальный баннер) -->
+  <!-- Экран 2: подробное описание методик -->
+  <div id="details-screen" class="app" style="display:none;">
+    <h1>Подробные рекомендации</h1>
+    <div class="subtitle">
+      Ниже приведён общий план работы с зонами на кистях и области головы/груди. Выбирайте то, что откликается и не вызывает дискомфорта.
+    </div>
+
+    <div class="tcm-block">
+      <div class="tcm-title">1. Зоны для расслабления головы и шеи</div>
+      <div class="tcm-text">
+        <ul class="list">
+          <li>Мягко массируйте большой палец кисти по всей длине (проекция головы) от основания к ногтю и обратно 1–3 минуты.</li>
+          <li>Проработайте основание большого и указательного пальца (зона шеи и плеч): медленные круговые нажатия подушечкой пальца или массажным мячиком 1–2 минуты.</li>
+          <li>Дышите медленно: вдох через нос на 4 счёта, выдох через рот на 6–8 счётов, наблюдая, как расслабляется область шеи.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="tcm-block">
+      <div class="tcm-title">2. Зоны для поддержки сердца и груди</div>
+      <div class="tcm-text">
+        <ul class="list">
+          <li>Найдите центр ладони и аккуратно промните его подушечкой большого пальца другой руки или концом мягкой палочки 1–3 минуты.</li>
+          <li>При ощущении тяжести в груди делайте мягкие надавливания в центре ладони в ритме дыхания: на вдохе ослабляйте, на выдохе слегка углубляйте давление.</li>
+          <li>Следите, чтобы дыхание оставалось ровным, без задержек и излишних усилий.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="tcm-block">
+      <div class="tcm-title">3. Зоны для поддержки почек и «ресурса»</div>
+      <div class="tcm-text">
+        <ul class="list">
+          <li>Аккуратно разогрейте всю кисть: поочерёдно растирайте ладонь и тыльную сторону до ощущения мягкого тепла.</li>
+          <li>Особое внимание уделите области у основания мизинца и безымянного пальца — мягкий массаж и растирание 1–2 минуты.</li>
+          <li>После работы с кистями положите руки на область поясницы (через одежду), почувствуйте тепло и сделайте несколько спокойных вдохов‑выдохов.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="tcm-block">
+      <div class="tcm-title">4. Общие рекомендации по практике</div>
+      <div class="tcm-text">
+        <ul class="list">
+          <li>Лучше делать коротко, но регулярно: по 3–5 минут несколько раз в день, чем 1 раз в неделю долго.</li>
+          <li>Следите за ощущениями: практики не должны вызывать острую боль, сильное ухудшение состояния или тревогу.</li>
+          <li>Если состояние вызывает сомнения (резкая боль в груди, сильная одышка, очень высокий уровень усталости) — обязательно обращайтесь к врачу.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="tcm-block" style="margin-top:12px;">
+      <button id="backBtn" class="btn-secondary">Вернуться к результату</button>
+      <div class="back-link" id="backLink">Назад к результатам теста</div>
+    </div>
+  </div>
+
+  <!-- Резервное место под постоянный рекламный баннер VK -->
   <div id="ad-container" class="ad-container">
     Здесь может быть рекламный баннер ВК
   </div>
@@ -161,6 +237,8 @@
     const questionsContainer = document.getElementById("questions");
     const calcBtn = document.getElementById("calcBtn");
     const resultDiv = document.getElementById("result");
+    const mainScreen = document.getElementById("main-screen");
+    const detailsScreen = document.getElementById("details-screen");
 
     function renderQuestions() {
       questionsContainer.innerHTML = "";
@@ -221,10 +299,9 @@
       let sujokText = "";
       let detailsHtml = "";
 
-      // --- Профили по ТКМ: печень, почки, сердце/шэнь --- [web:83][web:87][web:90]
-      const liverIndexes = [2, 3, 4, 9];     // печень: раздражительность, мышцы, голова, грудь
-      const kidneyIndexes = [0, 8, 10, 13];  // почки: усталость, не восстанавливается, выгорание
-      const heartIndexes = [1, 5, 6, 7];     // сердце/шэнь: сон, мысли, дыхание, концентрация
+      const liverIndexes = [2, 3, 4, 9];
+      const kidneyIndexes = [0, 8, 10, 13];
+      const heartIndexes = [1, 5, 6, 7];
 
       const maxLiver = liverIndexes.length * 4;
       const maxKidney = kidneyIndexes.length * 4;
@@ -239,15 +316,9 @@
       const heartPercent = Math.round(heartScore / maxHeart * 100);
 
       const profiles = [];
-      if (liverPercent >= 50) {
-        profiles.push({ key: 'liver', percent: liverPercent });
-      }
-      if (kidneyPercent >= 50) {
-        profiles.push({ key: 'kidney', percent: kidneyPercent });
-      }
-      if (heartPercent >= 50) {
-        profiles.push({ key: 'heart', percent: heartPercent });
-      }
+      if (liverPercent >= 50) profiles.push({ key: 'liver', percent: liverPercent });
+      if (kidneyPercent >= 50) profiles.push({ key: 'kidney', percent: kidneyPercent });
+      if (heartPercent >= 50) profiles.push({ key: 'heart', percent: heartPercent });
 
       if (profiles.length === 0) {
         const arr = [
@@ -292,8 +363,6 @@
           </div>
         `;
       }
-
-      // --- Общий уровень стресса и усталости (как раньше) --- [web:52][web:90]
 
       if (percent <= 30) {
         levelText = "Уровень стресса и усталости: низкий.";
@@ -368,9 +437,34 @@
             </a>
           </div>
         </div>
+        <button id="detailsBtn" class="btn-secondary">Подробнее о методиках</button>
       `;
 
-      // сюда позже можно будет добавить вызов рекламы в VK-версии (vkBridge)
+      // навешиваем обработчик на кнопку "Подробнее", если она появилась
+      const detailsBtn = document.getElementById("detailsBtn");
+      if (detailsBtn) {
+        detailsBtn.onclick = () => {
+          mainScreen.style.display = "none";
+          detailsScreen.style.display = "block";
+          // здесь в VK-версии можно будет вызывать показ рекламы после результата
+        };
+      }
+    }
+
+    // кнопки "назад" на подробном экране
+    const backBtn = document.getElementById("backBtn");
+    const backLink = document.getElementById("backLink");
+    if (backBtn) {
+      backBtn.onclick = () => {
+        detailsScreen.style.display = "none";
+        mainScreen.style.display = "block";
+      };
+    }
+    if (backLink) {
+      backLink.onclick = () => {
+        detailsScreen.style.display = "none";
+        mainScreen.style.display = "block";
+      };
     }
 
     calcBtn.addEventListener("click", calcResult);
