@@ -6,24 +6,28 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     :root {
-      --bg: #f2f5fb;
+      --bg: #eef3ff;
       --card-bg: #ffffff;
-      --accent: #5181b8;
-      --accent-soft: #e4f0ff;
-      --accent-strong: #3c6aa2;
-      --danger: #e64646;
-      --text-main: #222222;
-      --text-muted: #777777;
-      --border-soft: #dde3f0;
-      --radius-card: 18px;
+      --accent: #4c6fff;          /* яркий синий */
+      --accent-soft: #e1e7ff;
+      --accent-strong: #2740b8;
+      --accent-contrast: #39c46a; /* лаймово-зелёный */
+      --text-main: #141824;
+      --text-muted: #7a8194;
+      --border-soft: #d4ddff;
+      --radius-card: 20px;
       --radius-button: 999px;
+    }
+
+    * {
+      box-sizing: border-box;
     }
 
     body {
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       margin: 0;
       padding: 16px;
-      background: radial-gradient(circle at top left, #f3f6ff 0, #f2f5fb 40%, #e8edf8 100%);
+      background: radial-gradient(circle at top left, #f5f7ff 0, #eef3ff 40%, #e0e6ff 100%);
       color: var(--text-main);
     }
 
@@ -32,8 +36,8 @@
       margin: 0 auto;
       background: var(--card-bg);
       border-radius: var(--radius-card);
-      padding: 18px 16px 16px;
-      box-shadow: 0 12px 35px rgba(0,0,0,0.06);
+      padding: 20px 18px 16px;
+      box-shadow: 0 16px 40px rgba(25, 45, 120, 0.18);
       position: relative;
       overflow: hidden;
     }
@@ -41,11 +45,11 @@
     .app::before {
       content: "";
       position: absolute;
-      top: -60px;
-      right: -60px;
-      width: 140px;
-      height: 140px;
-      background: radial-gradient(circle, rgba(81,129,184,0.22), transparent 70%);
+      top: -80px;
+      right: -80px;
+      width: 180px;
+      height: 180px;
+      background: radial-gradient(circle, rgba(76,111,255,0.32), transparent 70%);
       pointer-events: none;
     }
 
@@ -59,34 +63,37 @@
       font-size: 13px;
       color: var(--text-muted);
       margin-bottom: 16px;
+      position: relative;
+      z-index: 1;
     }
 
     .pill {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      padding: 4px 10px;
+      padding: 4px 12px;
       border-radius: 999px;
-      background: var(--accent-soft);
+      background: linear-gradient(90deg, #e3f5ff, #e1e7ff);
       color: var(--accent-strong);
       font-size: 11px;
       margin-bottom: 10px;
       position: relative;
       z-index: 1;
+      box-shadow: 0 4px 10px rgba(76,111,255,0.2);
     }
 
     .pill-dot {
       width: 7px;
       height: 7px;
       border-radius: 50%;
-      background: var(--accent-strong);
+      background: var(--accent-contrast);
     }
 
     .question {
       margin-bottom: 14px;
       padding: 12px 10px 10px;
-      border-radius: 14px;
-      background: #f9fbff;
+      border-radius: 16px;
+      background: #f7f9ff;
       border: 1px solid var(--border-soft);
     }
 
@@ -99,8 +106,8 @@
     }
 
     .q-number {
-      min-width: 24px;
-      height: 24px;
+      min-width: 26px;
+      height: 26px;
       border-radius: 999px;
       background: var(--accent-soft);
       color: var(--accent-strong);
@@ -108,8 +115,9 @@
       align-items: center;
       justify-content: center;
       font-size: 13px;
-      font-weight: 600;
+      font-weight: 700;
       flex-shrink: 0;
+      box-shadow: 0 2px 6px rgba(76,111,255,0.25);
     }
 
     .q-text {
@@ -126,89 +134,109 @@
       flex: 1;
       min-width: 0;
       border-radius: var(--radius-button);
-      background: #e4e9f0;
+      background: #e4e9f5;
       color: var(--text-main);
       font-size: 12px;
       font-weight: 500;
       padding: 8px 10px;
       border: none;
       cursor: pointer;
-      transition: background 0.15s ease, transform 0.05s ease, box-shadow 0.15s ease;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+      transition:
+        background 0.15s ease,
+        transform 0.08s ease,
+        box-shadow 0.15s ease,
+        color 0.15s ease;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
       white-space: nowrap;
     }
 
     .option:hover {
-      background: #dde3f0;
+      background: #dde3f5;
+      transform: translateY(-1px);
+      box-shadow: 0 3px 8px rgba(76,111,255,0.25);
     }
 
     .option.selected {
-      background: var(--accent);
+      background: linear-gradient(135deg, var(--accent), #7a9bff);
       color: #ffffff;
-      box-shadow: 0 3px 10px rgba(81,129,184,0.35);
-      transform: translateY(-1px);
+      box-shadow: 0 4px 14px rgba(76,111,255,0.45);
+      transform: translateY(-1px) scale(0.98);
     }
 
     .option:active {
-      transform: translateY(0);
-      box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+      transform: translateY(1px) scale(0.96);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.2);
     }
 
     button {
       border-radius: var(--radius-button);
       border: none;
-      padding: 11px 16px;
+      padding: 12px 18px;
       font-size: 14px;
-      font-weight: 600;
+      font-weight: 700;
       cursor: pointer;
-      transition: background 0.15s ease, transform 0.05s ease, box-shadow 0.15s ease;
+      transition:
+        background 0.18s ease,
+        transform 0.08s ease,
+        box-shadow 0.18s ease;
     }
 
     .btn-primary {
-      background: var(--accent);
+      background: linear-gradient(135deg, var(--accent), #7a9bff);
       color: #fff;
       width: 100%;
       margin-top: 8px;
-      box-shadow: 0 4px 14px rgba(81,129,184,0.4);
+      box-shadow: 0 6px 18px rgba(76,111,255,0.55);
     }
 
     .btn-primary:hover:not(:disabled) {
-      background: var(--accent-strong);
+      background: linear-gradient(135deg, #5b7bff, #8aa5ff);
+      transform: translateY(-1px);
+      box-shadow: 0 8px 22px rgba(76,111,255,0.6);
     }
 
     .btn-primary:active:not(:disabled) {
-      transform: translateY(1px);
-      box-shadow: 0 2px 8px rgba(81,129,184,0.35);
+      transform: translateY(1px) scale(0.97);
+      box-shadow: 0 3px 10px rgba(76,111,255,0.45);
     }
 
     .btn-primary:disabled {
-      background: #bfcad9;
+      background: #b9c3e6;
       box-shadow: none;
       cursor: default;
     }
 
     .btn-secondary {
-      background: #e4e9f0;
-      color: var(--text-main);
+      background: #e4ecff;
+      color: var(--accent-strong);
       width: 100%;
-      margin-top: 8px;
+      margin-top: 10px;
+      box-shadow: 0 4px 14px rgba(68,80,150,0.18);
     }
 
     .btn-secondary:hover {
-      background: #dde3f0;
+      background: #d7e2ff;
+      transform: translateY(-1px);
+      box-shadow: 0 7px 18px rgba(68,80,150,0.25);
+    }
+
+    .btn-secondary:active {
+      transform: translateY(1px) scale(0.97);
+      box-shadow: 0 3px 10px rgba(68,80,150,0.2);
     }
 
     .result {
       margin-top: 16px;
       padding: 12px;
-      border-radius: 16px;
+      border-radius: 18px;
       background: #f0f5ff;
       font-size: 14px;
       border: 1px solid var(--border-soft);
+      box-shadow: 0 8px 24px rgba(25,45,120,0.12);
     }
 
     .level {
-      font-weight: 700;
+      font-weight: 800;
       margin-bottom: 6px;
     }
 
@@ -238,14 +266,14 @@
       margin: 16px auto 0;
       max-width: 520px;
       height: 60px;
-      background: #eef1f5;
-      border-radius: 16px;
+      background: #e7f3ff;
+      border-radius: 18px;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 12px;
-      color: #888;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+      color: #557099;
+      box-shadow: 0 10px 26px rgba(25,45,120,0.18);
     }
 
     .back-link {
@@ -273,7 +301,7 @@
       font-size: 11px;
       padding: 2px 8px;
       border-radius: 999px;
-      background: #fff4e0;
+      background: #fff4dd;
       color: #b26b00;
       margin-left: 4px;
     }
@@ -309,11 +337,11 @@
       Шаг 2 из 2 · Практика по точкам
     </div>
     <h1>Рекомендации по точкам</h1>
-    <div class="subtitle">
-      Ориентируйтесь на свой «профиль нагрузки» в результате теста: печень, почки, сердце/шэнь. Выберите блок, который больше вам подходит.
+    <div id="profile-hint" class="subtitle" style="margin-top:-4px;">
+      Ориентируйтесь на свой «профиль нагрузки» в результате теста: печень, почки, сердце/шэнь.
     </div>
 
-    <div class="tcm-block">
+    <div id="block-liver" class="tcm-block">
       <div class="tcm-title">
         1. Если больше вовлечена «печень» <span class="tag">напряжение, раздражительность</span>
       </div>
@@ -327,7 +355,7 @@
       </div>
     </div>
 
-    <div class="tcm-block">
+    <div id="block-kidney" class="tcm-block">
       <div class="tcm-title">
         2. Если больше вовлечены «почки» <span class="tag">усталость, «нет ресурса»</span>
       </div>
@@ -341,7 +369,7 @@
       </div>
     </div>
 
-    <div class="tcm-block">
+    <div id="block-heart" class="tcm-block">
       <div class="tcm-title">
         3. Если больше вовлечено «сердце/шэнь» <span class="tag">сон, тревога, мысли</span>
       </div>
@@ -412,6 +440,15 @@
     const backBtn = document.getElementById("backBtn");
     const backLink = document.getElementById("backLink");
 
+    const profileHint = document.getElementById("profile-hint");
+    const blockLiver = document.getElementById("block-liver");
+    const blockKidney = document.getElementById("block-kidney");
+    const blockHeart = document.getElementById("block-heart");
+
+    // ведущий профиль: 'liver' | 'kidney' | 'heart'
+    let dominantProfile = null;
+
+    // звук клика [web:118][web:121]
     const clickSound = new Audio("https://www.fesliyanstudios.com/play-mp3/387");
     clickSound.volume = 0.2;
 
@@ -481,6 +518,41 @@
       calcBtn.disabled = !allAnswered;
     }
 
+    function highlightProfileBlock() {
+      [blockLiver, blockKidney, blockHeart].forEach(block => {
+        if (!block) return;
+        block.style.boxShadow = "none";
+        block.style.border = "none";
+        block.style.backgroundColor = "";
+      });
+
+      if (!dominantProfile || !profileHint) return;
+
+      let targetBlock = null;
+      let hintText = "";
+
+      if (dominantProfile === "liver") {
+        targetBlock = blockLiver;
+        hintText = "По вашему профилю больше вовлечена система «печень». Начните с этого блока рекомендаций.";
+      } else if (dominantProfile === "kidney") {
+        targetBlock = blockKidney;
+        hintText = "По вашему профилю больше вовлечены «почки» (ресурс). Начните с этого блока рекомендаций.";
+      } else if (dominantProfile === "heart") {
+        targetBlock = blockHeart;
+        hintText = "По вашему профилю больше вовлечено «сердце/шэнь». Начните с этого блока рекомендаций.";
+      }
+
+      if (targetBlock) {
+        targetBlock.style.boxShadow = "0 0 0 2px rgba(76,111,255,0.45)";
+        targetBlock.style.borderRadius = "18px";
+        targetBlock.style.backgroundColor = "#f3f6ff";
+      }
+
+      if (hintText) {
+        profileHint.textContent = hintText;
+      }
+    }
+
     function calcResult() {
       playClick();
 
@@ -523,6 +595,8 @@
         arr.sort((a, b) => b.percent - a.percent);
         profiles.push(arr[0]);
       }
+
+      dominantProfile = profiles[0]?.key || null;
 
       function getProfileText(p) {
         if (p.key === 'liver') {
@@ -621,12 +695,12 @@
             <a href="https://vk.com/app54590886" target="_blank" style="
               display:inline-block;
               text-decoration:none;
-              background:#4bb34b;
+              background:linear-gradient(135deg,#34c759,#6be080);
               color:#fff;
-              padding:8px 12px;
+              padding:8px 14px;
               border-radius:999px;
               font-size:13px;
-              box-shadow:0 3px 10px rgba(75,179,75,0.35);
+              box-shadow:0 4px 12px rgba(52,199,89,0.55);
             ">
               Открыть календарь Цзы‑У / Су‑джок
             </a>
@@ -641,6 +715,7 @@
           playClick();
           mainScreen.style.display = "none";
           detailsScreen.style.display = "block";
+          highlightProfileBlock();
         };
       }
     }
