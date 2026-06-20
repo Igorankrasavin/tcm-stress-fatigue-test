@@ -5,133 +5,279 @@
   <title>Тест уровня стресса и усталости</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
+    :root {
+      --bg: #f2f5fb;
+      --card-bg: #ffffff;
+      --accent: #5181b8;
+      --accent-soft: #e4f0ff;
+      --accent-strong: #3c6aa2;
+      --danger: #e64646;
+      --text-main: #222222;
+      --text-muted: #777777;
+      --border-soft: #dde3f0;
+      --radius-card: 18px;
+      --radius-button: 999px;
+    }
+
     body {
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       margin: 0;
       padding: 16px;
-      background: #f5f5f5;
-      color: #222;
+      background: radial-gradient(circle at top left, #f3f6ff 0, #f2f5fb 40%, #e8edf8 100%);
+      color: var(--text-main);
     }
+
     .app {
-      max-width: 480px;
+      max-width: 520px;
       margin: 0 auto;
-      background: #fff;
-      border-radius: 12px;
-      padding: 16px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      background: var(--card-bg);
+      border-radius: var(--radius-card);
+      padding: 18px 16px 16px;
+      box-shadow: 0 12px 35px rgba(0,0,0,0.06);
+      position: relative;
+      overflow: hidden;
     }
+
+    .app::before {
+      content: "";
+      position: absolute;
+      top: -60px;
+      right: -60px;
+      width: 140px;
+      height: 140px;
+      background: radial-gradient(circle, rgba(81,129,184,0.22), transparent 70%);
+      pointer-events: none;
+    }
+
     h1 {
-      font-size: 20px;
-      margin-bottom: 8px;
+      font-size: 22px;
+      margin: 0 0 6px;
+      letter-spacing: 0.02em;
     }
+
     .subtitle {
-      font-size: 14px;
-      color: #666;
+      font-size: 13px;
+      color: var(--text-muted);
       margin-bottom: 16px;
     }
+
+    /* бейдж «шагов» */
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent-strong);
+      font-size: 11px;
+      margin-bottom: 10px;
+    }
+
+    .pill-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--accent-strong);
+    }
+
     .question {
-      margin-bottom: 16px;
-      padding-bottom: 12px;
-      border-bottom: 1px solid #eee;
+      margin-bottom: 14px;
+      padding: 12px 10px 10px;
+      border-radius: 14px;
+      background: #f9fbff;
+      border: 1px solid var(--border-soft);
     }
+
     .question-title {
-      font-size: 15px;
+      font-size: 14px;
       margin-bottom: 8px;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
     }
+
+    .q-number {
+      min-width: 24px;
+      height: 24px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent-strong);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .q-text {
+      flex: 1;
+    }
+
     .options {
       display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
+      gap: 6px;
+      flex-wrap: nowrap;
     }
+
     .option {
       flex: 1;
-      min-width: 80px;
-    }
-    button {
-      cursor: pointer;
-      border-radius: 8px;
+      min-width: 0;
+      border-radius: var(--radius-button);
+      background: #e4e9f0;
+      color: var(--text-main);
+      font-size: 12px;
+      font-weight: 500;
+      padding: 8px 10px;
       border: none;
-      padding: 10px 14px;
-      font-size: 14px;
+      cursor: pointer;
+      transition: background 0.15s ease, transform 0.05s ease, box-shadow 0.15s ease;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+      white-space: nowrap;
     }
+
+    .option:hover {
+      background: #dde3f0;
+    }
+
+    .option.selected {
+      background: var(--accent);
+      color: #ffffff;
+      box-shadow: 0 3px 10px rgba(81,129,184,0.35);
+      transform: translateY(-1px);
+    }
+
+    .option:active {
+      transform: translateY(0);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    }
+
+    button {
+      border-radius: var(--radius-button);
+      border: none;
+      padding: 11px 16px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s ease, transform 0.05s ease, box-shadow 0.15s ease;
+    }
+
     .btn-primary {
-      background: #5181b8;
+      background: var(--accent);
       color: #fff;
       width: 100%;
       margin-top: 8px;
+      box-shadow: 0 4px 14px rgba(81,129,184,0.4);
     }
+
+    .btn-primary:hover:not(:disabled) {
+      background: var(--accent-strong);
+    }
+
+    .btn-primary:active:not(:disabled) {
+      transform: translateY(1px);
+      box-shadow: 0 2px 8px rgba(81,129,184,0.35);
+    }
+
     .btn-primary:disabled {
-      background: #9fb7d3;
+      background: #bfcad9;
+      box-shadow: none;
       cursor: default;
     }
+
     .btn-secondary {
       background: #e4e9f0;
-      color: #222;
+      color: var(--text-main);
       width: 100%;
       margin-top: 8px;
     }
+
+    .btn-secondary:hover {
+      background: #dde3f0;
+    }
+
     .result {
       margin-top: 16px;
       padding: 12px;
-      border-radius: 8px;
+      border-radius: 16px;
       background: #f0f5ff;
       font-size: 14px;
+      border: 1px solid var(--border-soft);
     }
+
     .level {
-      font-weight: 600;
-      margin-bottom: 8px;
+      font-weight: 700;
+      margin-bottom: 6px;
     }
+
     .tcm-block {
       margin-top: 8px;
     }
+
     .tcm-title {
       font-weight: 600;
-      font-size: 14px;
+      font-size: 13px;
       margin-bottom: 4px;
     }
+
     .tcm-text {
       font-size: 13px;
       color: #333;
     }
+
     .footer {
       margin-top: 16px;
-      font-size: 12px;
-      color: #999;
+      font-size: 11px;
+      color: var(--text-muted);
       text-align: center;
     }
+
     .ad-container {
       margin: 16px auto 0;
-      max-width: 480px;
+      max-width: 520px;
       height: 60px;
       background: #eef1f5;
-      border-radius: 8px;
+      border-radius: 16px;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 12px;
       color: #888;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.06);
     }
+
     .back-link {
       margin-top: 8px;
       font-size: 13px;
-      color: #5181b8;
+      color: var(--accent-strong);
       cursor: pointer;
       text-decoration: underline;
+      text-align: center;
     }
+
     .list {
       margin: 4px 0 0 18px;
       padding: 0;
       font-size: 13px;
       color: #444;
     }
+
+    .list li {
+      margin-bottom: 2px;
+    }
   </style>
 </head>
 <body>
   <!-- Экран 1: тест + результат -->
   <div id="main-screen" class="app">
+    <div class="pill">
+      <div class="pill-dot"></div>
+      Шаг 1 из 2 · Оценка состояния
+    </div>
     <h1>Тест стресса и усталости</h1>
     <div class="subtitle">
-      Ответьте на вопросы за 2–3 минуты. В конце получите уровень нагрузки и базовые рекомендации по ТКМ / Су‑Джок.
+      Ответьте на вопросы за 2–3 минуты. В конце получите уровень нагрузки и рекомендации по ТКМ / Су‑Джок.
     </div>
 
     <div id="questions"></div>
@@ -147,9 +293,13 @@
 
   <!-- Экран 2: подробное описание методик -->
   <div id="details-screen" class="app" style="display:none;">
+    <div class="pill">
+      <div class="pill-dot"></div>
+      Шаг 2 из 2 · Практика
+    </div>
     <h1>Подробные рекомендации</h1>
     <div class="subtitle">
-      Ниже приведён общий план работы с зонами на кистях и области головы/груди. Выбирайте то, что откликается и не вызывает дискомфорта.
+      Ниже общий план работы с зонами на кистях и области головы/груди. Выбирайте то, что откликается и не вызывает дискомфорта.
     </div>
 
     <div class="tcm-block">
@@ -202,7 +352,7 @@
     </div>
   </div>
 
-  <!-- Резервное место под постоянный рекламный баннер VK -->
+  <!-- Резервное место под рекламный баннер VK -->
   <div id="ad-container" class="ad-container">
     Здесь может быть рекламный баннер ВК
   </div>
@@ -239,6 +389,21 @@
     const resultDiv = document.getElementById("result");
     const mainScreen = document.getElementById("main-screen");
     const detailsScreen = document.getElementById("details-screen");
+    const backBtn = document.getElementById("backBtn");
+    const backLink = document.getElementById("backLink");
+
+    // простой звук на клик (короткий "тик") [web:99][web:101]
+    const clickSound = new Audio("https://www.fesliyanstudios.com/play-mp3/387");
+    clickSound.volume = 0.2;
+
+    function playClick() {
+      try {
+        // клон, чтобы звуки не обрезали друг друга
+        const s = clickSound.cloneNode();
+        s.volume = clickSound.volume;
+        s.play().catch(() => {});
+      } catch (e) {}
+    }
 
     function renderQuestions() {
       questionsContainer.innerHTML = "";
@@ -248,7 +413,17 @@
 
         const title = document.createElement("div");
         title.className = "question-title";
-        title.textContent = (index + 1) + ". " + q;
+
+        const num = document.createElement("div");
+        num.className = "q-number";
+        num.textContent = index + 1;
+
+        const text = document.createElement("div");
+        text.className = "q-text";
+        text.textContent = q;
+
+        title.appendChild(num);
+        title.appendChild(text);
         qEl.appendChild(title);
 
         const opts = document.createElement("div");
@@ -259,6 +434,7 @@
           btn.className = "option";
           btn.textContent = opt.label;
           btn.onclick = () => {
+            playClick();
             answers[index] = opt.value;
             updateButtonsState(opts, opt.label);
             updateCalcButtonState();
@@ -275,11 +451,9 @@
       const buttons = container.querySelectorAll("button");
       buttons.forEach(btn => {
         if (btn.textContent === selectedLabel) {
-          btn.style.background = "#5181b8";
-          btn.style.color = "#fff";
+          btn.classList.add("selected");
         } else {
-          btn.style.background = "#e4e9f0";
-          btn.style.color = "#222";
+          btn.classList.remove("selected");
         }
       });
     }
@@ -290,6 +464,8 @@
     }
 
     function calcResult() {
+      playClick();
+
       const total = answers.reduce((sum, v) => sum + v, 0);
       const max = questions.length * 4;
       const percent = Math.round(total / max * 100);
@@ -430,8 +606,9 @@
               background:#4bb34b;
               color:#fff;
               padding:8px 12px;
-              border-radius:8px;
+              border-radius:999px;
               font-size:13px;
+              box-shadow:0 3px 10px rgba(75,179,75,0.35);
             ">
               Открыть календарь Цзы‑У / Су‑джок
             </a>
@@ -440,28 +617,27 @@
         <button id="detailsBtn" class="btn-secondary">Подробнее о методиках</button>
       `;
 
-      // навешиваем обработчик на кнопку "Подробнее", если она появилась
       const detailsBtn = document.getElementById("detailsBtn");
       if (detailsBtn) {
         detailsBtn.onclick = () => {
+          playClick();
           mainScreen.style.display = "none";
           detailsScreen.style.display = "block";
-          // здесь в VK-версии можно будет вызывать показ рекламы после результата
         };
       }
     }
 
-    // кнопки "назад" на подробном экране
-    const backBtn = document.getElementById("backBtn");
-    const backLink = document.getElementById("backLink");
     if (backBtn) {
       backBtn.onclick = () => {
+        playClick();
         detailsScreen.style.display = "none";
         mainScreen.style.display = "block";
       };
     }
+
     if (backLink) {
       backLink.onclick = () => {
+        playClick();
         detailsScreen.style.display = "none";
         mainScreen.style.display = "block";
       };
