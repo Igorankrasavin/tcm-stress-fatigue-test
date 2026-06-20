@@ -221,6 +221,80 @@
       let sujokText = "";
       let detailsHtml = "";
 
+      // --- Профили по ТКМ: печень, почки, сердце/шэнь --- [web:83][web:87][web:90]
+      const liverIndexes = [2, 3, 4, 9];     // печень: раздражительность, мышцы, голова, грудь
+      const kidneyIndexes = [0, 8, 10, 13];  // почки: усталость, не восстанавливается, выгорание
+      const heartIndexes = [1, 5, 6, 7];     // сердце/шэнь: сон, мысли, дыхание, концентрация
+
+      const maxLiver = liverIndexes.length * 4;
+      const maxKidney = kidneyIndexes.length * 4;
+      const maxHeart = heartIndexes.length * 4;
+
+      const liverScore = liverIndexes.reduce((sum, idx) => sum + (answers[idx] || 0), 0);
+      const kidneyScore = kidneyIndexes.reduce((sum, idx) => sum + (answers[idx] || 0), 0);
+      const heartScore = heartIndexes.reduce((sum, idx) => sum + (answers[idx] || 0), 0);
+
+      const liverPercent = Math.round(liverScore / maxLiver * 100);
+      const kidneyPercent = Math.round(kidneyScore / maxKidney * 100);
+      const heartPercent = Math.round(heartScore / maxHeart * 100);
+
+      const profiles = [];
+      if (liverPercent >= 50) {
+        profiles.push({ key: 'liver', percent: liverPercent });
+      }
+      if (kidneyPercent >= 50) {
+        profiles.push({ key: 'kidney', percent: kidneyPercent });
+      }
+      if (heartPercent >= 50) {
+        profiles.push({ key: 'heart', percent: heartPercent });
+      }
+
+      if (profiles.length === 0) {
+        const arr = [
+          { key: 'liver', percent: liverPercent },
+          { key: 'kidney', percent: kidneyPercent },
+          { key: 'heart', percent: heartPercent }
+        ];
+        arr.sort((a, b) => b.percent - a.percent);
+        profiles.push(arr[0]);
+      }
+
+      function getProfileText(p) {
+        if (p.key === 'liver') {
+          return `
+            <li><b>Система «печень»</b> — возможный застой Ци печени: напряжение, раздражительность, мышечные зажимы, тяжесть в груди или голове. Подойдут практики мягкого движения, растяжки и расслабляющего массажа зон шеи/плеч и головы.</li>
+          `;
+        }
+        if (p.key === 'kidney') {
+          return `
+            <li><b>Система «почки»</b> — признаки истощения ресурса: хроническая усталость, ощущение «батарейка на нуле», слабое восстановление даже после отдыха. Важно бережно относиться к режиму сна, не перерасходовать себя и добавлять тёплые, поддерживающие практики.</li>
+          `;
+        }
+        if (p.key === 'heart') {
+          return `
+            <li><b>Система «сердце/шэнь»</b> — перегрузка ума и духа: беспокойный сон, чувство, что мысли не останавливаются, тревога, рассеянность. Полезны дыхательные практики, успокаивающий самомассаж кистей и снижение информационного шума перед сном.</li>
+          `;
+        }
+        return "";
+      }
+
+      let profileHtml = "";
+      if (profiles.length > 0) {
+        profileHtml = `
+          <div class="tcm-block">
+            <div class="tcm-title">Профиль нагрузки (по ТКМ):</div>
+            <ul style="margin:4px 0 0 18px;padding:0;font-size:13px;color:#444;">
+              ${profiles.map(getProfileText).join('')}
+            </ul>
+            <div style="margin-top:6px;font-size:12px;color:#777;">
+              Это упрощённое отражение возможных тенденций по ТКМ, а не медицинский диагноз.
+            </div>
+          </div>
+        `;
+      }
+
+      // --- Общий уровень стресса и усталости (как раньше) --- [web:52][web:90]
+
       if (percent <= 30) {
         levelText = "Уровень стресса и усталости: низкий.";
         tcmText = "С позиции ТКМ это похоже на относительно гармоничный баланс Ци. Поддерживайте режим сна, лёгкую физическую активность и мягкое дыхание животом.";
@@ -267,6 +341,7 @@
           <div class="tcm-title">Практика Су-Джок:</div>
           <div class="tcm-text">${sujokText}</div>
         </div>
+        ${profileHtml}
         <div class="tcm-block">
           <div class="tcm-title">Дополнительно:</div>
           ${detailsHtml}
@@ -295,8 +370,7 @@
         </div>
       `;
 
-      // здесь в будущем, в VK-версии, можно будет вызывать показ рекламы
-      // через vkBridge (VKWebAppShowBannerAd или VKWebAppShowNativeAds)
+      // сюда позже можно будет добавить вызов рекламы в VK-версии (vkBridge)
     }
 
     calcBtn.addEventListener("click", calcResult);
